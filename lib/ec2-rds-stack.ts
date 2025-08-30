@@ -68,23 +68,33 @@ export class Ec2RdsStack extends cdk.Stack {
       });
     }
 
-    // Create RDS MySQL instance
+    // Create RDS MySQL instance with cost optimizations
     new rds.DatabaseInstance(this, 'MySQLDatabase', {
       engine: rds.DatabaseInstanceEngine.mysql({
         version: rds.MysqlEngineVersion.VER_8_0,
       }),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.M5, ec2.InstanceSize.LARGE),
+      // Downsize from db.m5.large to db.t3.medium for cost savings
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MEDIUM),
       vpc,
       credentials: rds.Credentials.fromGeneratedSecret('admin'),
       multiAz: false,
       allocatedStorage: 20,
-      storageType: rds.StorageType.GP2,
+      // Migrate from gp2 to gp3 storage for better performance and cost efficiency
+      storageType: rds.StorageType.GP3,
       deletionProtection: false,
       databaseName: 'myapp',
       securityGroups: [rdsSecurityGroup],
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
+      // Enable Performance Insights for better monitoring
+      performanceInsightRetention: cdk.Duration.days(7),
+      // Set backup retention period to 7 days for better data protection
+      backupRetention: cdk.Duration.days(7),
+      // Enable auto minor version upgrades for better security
+      autoMinorVersionUpgrade: true,
+      // Enable deletion protection in production (commented out for development)
+      // deletionProtection: true,
     });
   }
 }
