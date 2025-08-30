@@ -73,12 +73,14 @@ export class Ec2RdsStack extends cdk.Stack {
       engine: rds.DatabaseInstanceEngine.mysql({
         version: rds.MysqlEngineVersion.VER_8_0,
       }),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.M5, ec2.InstanceSize.LARGE),
+      // Changed instance type from m5.large to t4g.medium for cost optimization
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.MEDIUM),
       vpc,
       credentials: rds.Credentials.fromGeneratedSecret('admin'),
       multiAz: false,
       allocatedStorage: 20,
-      storageType: rds.StorageType.GP2,
+      // Changed storage type from GP2 to GP3 for better cost efficiency
+      storageType: rds.StorageType.GP3,
       deletionProtection: false,
       databaseName: 'myapp',
       securityGroups: [rdsSecurityGroup],
