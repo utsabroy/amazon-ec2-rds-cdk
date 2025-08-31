@@ -69,11 +69,13 @@ export class Ec2RdsStack extends cdk.Stack {
     }
 
     // Create RDS MySQL instance
+    // Note: Consider purchasing a 1-year reserved instance for additional cost savings
     new rds.DatabaseInstance(this, 'MySQLDatabase', {
       engine: rds.DatabaseInstanceEngine.mysql({
         version: rds.MysqlEngineVersion.VER_8_0,
       }),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.M5, ec2.InstanceSize.LARGE),
+      // Changed from m5.large to t3.medium for cost optimization
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MEDIUM),
       vpc,
       credentials: rds.Credentials.fromGeneratedSecret('admin'),
       multiAz: false,
@@ -85,6 +87,9 @@ export class Ec2RdsStack extends cdk.Stack {
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
+      // Enable storage auto-scaling with proper min/max limits
+      maxAllocatedStorage: 100, // Set maximum storage limit to 100 GB
+      autoMinorVersionUpgrade: true,
     });
   }
 }
