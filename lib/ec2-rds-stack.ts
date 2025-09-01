@@ -73,7 +73,8 @@ export class Ec2RdsStack extends cdk.Stack {
       engine: rds.DatabaseInstanceEngine.mysql({
         version: rds.MysqlEngineVersion.VER_8_0,
       }),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.M5, ec2.InstanceSize.LARGE),
+      // Changed instance type to t3.small for cost optimization
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL),
       vpc,
       credentials: rds.Credentials.fromGeneratedSecret('admin'),
       multiAz: false,
@@ -85,6 +86,16 @@ export class Ec2RdsStack extends cdk.Stack {
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
+      // Enable storage encryption for better security
+      storageEncrypted: true,
+      // Implement automated snapshots with longer retention
+      backupRetention: cdk.Duration.days(14),
+      // Enable automated backups
+      backup: {
+        retention: cdk.Duration.days(14),
+      },
+      // Enable Performance Insights for monitoring
+      monitoringInterval: cdk.Duration.seconds(60),
     });
   }
 }
